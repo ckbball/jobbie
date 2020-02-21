@@ -1,6 +1,8 @@
 package http
 
 import (
+  "net/http"
+
   "github.com/labstack/echo/v4"
 
   "github.com/ckbball/quik"
@@ -8,13 +10,28 @@ import (
 
 type userUpsertRequest struct {
   User struct {
-    Email     string       `json:"email,omitempty"`
-    Password  string       `json:"password,omitempty"`
-    FirstName string       `json:"first_name,omitempty"`
-    LastName  string       `json:"last_name,omitempty"`
-    JobSearch int          `json:"job_search,omitempty"`
-    Profile   quik.Profile `json:"profile,omitempty"`
+    Email        string       `json:"email,omitempty"`
+    Password     string       `json:"password,omitempty"`
+    FirstName    string       `json:"first_name,omitempty"`
+    LastName     string       `json:"last_name,omitempty"`
+    JobSearch    int          `json:"job_search,omitempty"`
+    Profile      quik.Profile `json:"profile,omitempty"`
+    Applications []string     `json:"applications"`
+    SavedJobs    []string     `json:"saved_jobs"`
   } `json:"user"`
+}
+
+func (u *userUpsertRequest) FieldMap(req *http.Request) binding.FieldMap {
+  return binding.FieldMap{
+    &u.User.Email:        "email",
+    &u.User.Password:     "password",
+    &u.User.FirstName:    "first_name",
+    &u.User.LastName:     "last_name",
+    &u.User.JobSearch:    "job_search",
+    &u.User.Profile:      "profile",
+    &u.User.Applications: "applications",
+    &u.User.SavedJobs:    "saved_jobs",
+  }
 }
 
 func newUserUpsertRequest() *userUpsertRequest {
@@ -60,6 +77,15 @@ type userRegisterRequest struct {
     Email     string `json:"email" validate:"required,email"`
     Password  string `json:"password" validate:"required"`
   } `json:"user"`
+}
+
+func (u *userRegisterRequest) FieldMap(req *http.Request) binding.FieldMap {
+  return binding.FieldMap{
+    &u.User.Email:     "email",
+    &u.User.Password:  "password",
+    &u.User.FirstName: "first_name",
+    &u.User.LastName:  "last_name",
+  }
 }
 
 func (r *userRegisterRequest) bind(c echo.Context, u *quik.User) error {

@@ -3,7 +3,9 @@ package quik
 import (
   //"context"
   "errors"
+  "net/http"
 
+  "github.com/mholt/binding"
   "go.mongodb.org/mongo-driver/bson/primitive"
   "golang.org/x/crypto/bcrypt"
 )
@@ -19,6 +21,20 @@ type User struct {
   Applications []string           `json:"applications,omitempty" bson:"applications,omitempty"` // holds the id's of applications
   SavedJobs    []string           `json:"saved_jobs,omitempty" bson:"saved_jobs,omitempty"`     // holds the id's of jobs that they want to come back to later
   Secret       string             // this is the string they will post to their github profile to confirm that the account is theirs?
+}
+
+func (u *User) FieldMap(req *http.Request) binding.FieldMap {
+  return binding.FieldMap{
+    &u.Id:           "_id",
+    &u.Email:        "email",
+    &u.Password:     "password",
+    &u.FirstName:    "first_name",
+    &u.LastName:     "last_name",
+    &u.JobSearch:    "job_search",
+    &u.Profile:      "profile",
+    &u.Applications: "applications",
+    &u.SavedJobs:    "saved_jobs",
+  }
 }
 
 // need context when using SQL DB
