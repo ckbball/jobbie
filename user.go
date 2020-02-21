@@ -40,7 +40,7 @@ func (u *User) FieldMap(req *http.Request) binding.FieldMap {
 // need context when using SQL DB
 type UserService interface {
   CreateUser(user *User) error
-  UpsertUser(user *User) error
+  UpsertUser(user *User, id string) (int64, int64, error)
   GetByID(id string) (*User, error)
   GetByEmail(email string) (*User, error)
   GetByJobStatus(status int) (*User, error)

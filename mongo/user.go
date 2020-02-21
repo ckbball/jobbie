@@ -5,7 +5,7 @@ import (
 
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
-  "go.mongodb.org/mongo-driver/mongo"
+  //"go.mongodb.org/mongo-driver/mongo"
   //"go.mongodb.org/mongo-driver/mongo/options"
 
   "github.com/ckbball/quik"
@@ -14,12 +14,12 @@ import (
 var _ quik.UserService = &UserService{}
 
 type UserService struct {
-  ds *mongo.Collection //
+  db *DB //
 }
 
-func NewUserService(client *mongo.Collection) *UserService {
+func NewUserService(client *DB) *UserService {
   return &UserService{
-    ds: client,
+    db: client,
   }
 }
 
@@ -27,7 +27,7 @@ func (s *UserService) GetByID(id string) (*quik.User, error) {
   primitiveId, _ := primitive.ObjectIDFromHex(id)
 
   var user quik.User
-  err := s.ds.FindOne(context.TODO(), quik.User{Id: primitiveId}).Decode(&user)
+  err := s.db.ds.FindOne(context.TODO(), quik.User{Id: primitiveId}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -38,7 +38,7 @@ func (s *UserService) GetByID(id string) (*quik.User, error) {
 func (s *UserService) GetByJobStatus(status int) (*quik.User, error) {
 
   var user quik.User
-  err := s.ds.FindOne(context.TODO(), quik.User{JobSearch: status}).Decode(&user)
+  err := s.db.ds.FindOne(context.TODO(), quik.User{JobSearch: status}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -49,7 +49,7 @@ func (s *UserService) GetByJobStatus(status int) (*quik.User, error) {
 func (s *UserService) GetByEmail(email string) (*quik.User, error) {
 
   var user quik.User
-  err := s.ds.FindOne(context.TODO(), quik.User{Email: email}).Decode(&user)
+  err := s.db.ds.FindOne(context.TODO(), quik.User{Email: email}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -67,7 +67,8 @@ func (service *UserService) CreateUser(user *quik.User) error {
     {"last_name", user.LastName},
   }
 
-  result, err := service.ds.InsertOne(context.TODO(), insertUser)
+  /*result*/
+  _, err := service.db.ds.InsertOne(context.TODO(), insertUser)
 
   if err != nil {
     return err
@@ -94,10 +95,10 @@ func (service *UserService) UpsertUser(user *quik.User, id string) (int64, int64
     {"last_name", user.LastName},
     {"job_search", user.JobSearch},
     {"profile", user.Profile},
-    // in the future add other fields
+    // in the future add other fieldb
   }
 
-  result, err := service.ds.UpdateOne(context.TODO(),
+  result, err := service.db.ds.UpdateOne(context.TODO(),
     bson.D{
       {"_id", primitiveId},
     },
@@ -118,7 +119,7 @@ func (service *UserService) Delete(id string) (int64, error) {
   primitiveId, _ := primitive.ObjectIDFromHex(id)
   filter := bson.D{{"_id", primitiveId}}
 
-  result, err := Service.ds.DeleteOne(context.TODO(), filter)
+  result, err := Service.db.DeleteOne(context.TODO(), filter)
   if err != nil {
     return -1, err
   }
@@ -135,7 +136,7 @@ func (s *UserService) FilterUsers(req *v1.FindRequest) ([]*User, error) {
   findOptions.SetSkip(int64(req.Page))
 
   var users []*User
-  cur, err := s.ds.Find(context.TODO(),
+  cur, err := s.db.Find(context.TODO(),
     bson.D{
       {"experience", req.Experience},
     },

@@ -51,7 +51,7 @@ func (s *Server) Open() error {
   }
 
   // Start HTTP server.
-  go http.Serve(s.ln, s.router())
+  go http.Serve(s.ln, s.Router())
 
   return nil
 }
@@ -64,7 +64,7 @@ func (s *Server) Close() error {
   return nil
 }
 
-func (s *Server) router() http.Handler {
+func (s *Server) Router() http.Handler {
   r := chi.NewRouter()
 
   // Attach router middleware.
@@ -79,7 +79,7 @@ func (s *Server) router() http.Handler {
   //r.Use(s.detectAccept)
 
   // Create API routes.
-  r.Route("/", func(r chi.Router) {
+  r.Route("/api/v1/", func(r chi.Router) {
     //r.Use(middleware.DefaultCompress)
     //r.Get("/ping", s.handlePing)
     r.Mount("/users", s.userHandler())

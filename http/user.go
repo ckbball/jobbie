@@ -2,11 +2,15 @@ package http
 
 import (
   //"context"
+  "encoding/json"
+  "fmt"
+  "io/ioutil"
   "net/http"
+  "os"
 
   "github.com/ckbball/quik"
   "github.com/go-chi/chi"
-  "github.com/mholt/binding"
+  "golang.org/x/crypto/bcrypt"
 )
 
 type userHandler struct {
@@ -18,7 +22,7 @@ type userHandler struct {
 
 func newUserHandler() *userHandler {
   h := &userHandler{router: chi.NewRouter()}
-  h.router.Post("/api/v1/signup", h.handleNewUser)
+  h.router.Post("/signup", h.handleNewUser)
   return h
 }
 
@@ -29,28 +33,47 @@ func (h *userHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (h *userHandler) handleNewUser(w http.ResponseWriter, r *http.Request) {
   // initialize variables
-  var user quik.User
+  user := &quik.User{}
   req := &userRegisterRequest{}
 
   // bind request to request struct
-  if err := binding.Bind(req); err != nil {
+  reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
     return
   }
 
-  // assign user the User from the request
-  user = req.User
+  // unmarshal json body into team request struct
+  err = json.Unmarshal(reqBody, &req)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
+  }
+
+  hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.User.Password), bcrypt.DefaultCost)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
+    return
+  }
+  user.Email = req.User.Email
+  user.Password = string(hashedPass)
+  user.FirstName = req.User.FirstName
+  user.LastName = req.User.LastName
+  fmt.Fprintf(os.Stderr, "user after bind: %s\n", req.User)
 
   // call the datastore method to create a new user in the datastore
-  if err := h.userService.CreateUser(&u); err != nil {
+
+  if err := h.userService.CreateUser(user); err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
     return
   }
 
   // marshall a successful response
-  marshalledResp, err := json.Marshal(newUserResponse(&u))
+  marshalledResp, err := json.Marshal(newUserResponse(user))
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //log.WithField("error", err).Error("marshall error")

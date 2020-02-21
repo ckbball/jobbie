@@ -25,6 +25,10 @@ func newUserResponse(u *quik.User) *userResponse {
   r.User.LastName = u.LastName
   r.User.JobSearch = u.JobSearch
   r.User.Profile = u.Profile
-  r.User.Token = utils.Encode(u)
-  return r
+  token, err := utils.Encode(u)
+  if err != nil {
+    return &r
+  }
+  r.User.Token = token
+  return &r
 }

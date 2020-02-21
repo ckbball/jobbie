@@ -1,13 +1,16 @@
 package main
 
 import (
+  "context"
   "fmt"
+  "io"
+  gottp "net/http"
   "os"
 
   "go.mongodb.org/mongo-driver/mongo"
   "go.mongodb.org/mongo-driver/mongo/options"
 
-  "github.com/ckbball/quik"
+  //"github.com/ckbball/quik"
   "github.com/ckbball/quik/http"
   myMongo "github.com/ckbball/quik/mongo"
 )
@@ -50,7 +53,7 @@ type Config struct {
 func main() {
   if err := run(os.Args, os.Stdout); err != nil {
     fmt.Fprintf(os.Stderr, "%s\n", err)
-    os.Exit(exitFail)
+    os.Exit(1)
   }
 }
 
@@ -64,11 +67,13 @@ func run(args []string, stdout io.Writer) error {
   var cfg Config
   cfg.MongoAddress = os.Getenv("MONGO_URI")
   cfg.MongoName = os.Getenv("MONGO_NAME")
+  fmt.Fprintf(os.Stderr, "%s\n", cfg.MongoAddress)
+  fmt.Fprintf(os.Stderr, "%s\n", cfg.MongoName)
 
   // grab db info needed here from env vars
 
-  sqlDB := db.NewSql() // pass info here
-  db.AutoMigrate(sqlDB)
+  //sqlDB := db.NewSql() // pass info here
+  //db.AutoMigrate(sqlDB)
 
   // make client
   clientOptions := options.Client().ApplyURI(cfg.MongoAddress)
@@ -90,11 +95,10 @@ func run(args []string, stdout io.Writer) error {
   httpServer.UserService = userService
 
   // Open HTTP server
-  if err := httpServer.Open(); err != nil {
-    return err
-  }
-  fmt.Fprintf(m.Stdout, "http listening: %s\n", httpServer.Addr)
-
+  fmt.Fprintf(os.Stderr, "http listening: %s\n", httpServer.Addr)
+  gottp.ListenAndServe(httpServer.Addr, httpServer.Router())
+  fmt.Fprintf(os.Stderr, "http listening: %s\n", httpServer.Addr)
+  return nil
 }
 
 /*
