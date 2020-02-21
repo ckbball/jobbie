@@ -5,8 +5,6 @@ import (
   "io/ioutil"
   "net"
   "net/http"
-  "net/url"
-  "path"
 
   "github.com/ckbball/quik"
   "github.com/go-chi/chi"

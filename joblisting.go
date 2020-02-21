@@ -2,7 +2,7 @@ package quik
 
 import (
   "context"
-  "errors"
+  //"errors"
 
   "github.com/jinzhu/gorm"
 )
@@ -37,5 +37,5 @@ type Requirement struct {
 
 type Technology struct {
   gorm.Model
-  Description
+  Description string
 }

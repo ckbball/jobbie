@@ -1,7 +1,7 @@
 package quik
 
 import (
-  "context"
+  //"context"
   "errors"
 
   "go.mongodb.org/mongo-driver/bson/primitive"
@@ -21,12 +21,13 @@ type User struct {
   Secret       string             // this is the string they will post to their github profile to confirm that the account is theirs?
 }
 
+// need context when using SQL DB
 type UserService interface {
-  CreateUser(ctx context.Context, user *User) error
-  UpsertUser(ctx context.Context, user *User) error
-  GetByID(ctx context.Context, id int) (*User, error)
-  GetByEmail(ctx context.Context, id int) (*User, error)
-  GetByJobStatus(ctx context.Context, status int) (*User, error)
+  CreateUser(user *User) error
+  UpsertUser(user *User) error
+  GetByID(id string) (*User, error)
+  GetByEmail(email string) (*User, error)
+  GetByJobStatus(status int) (*User, error)
   // AddApplication
   // AddListing
   // RemoveApplication

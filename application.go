@@ -2,7 +2,7 @@ package quik
 
 import (
   "context"
-  "errors"
+  //"errors"
 
   "github.com/jinzhu/gorm"
 )

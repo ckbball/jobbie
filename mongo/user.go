@@ -6,7 +6,7 @@ import (
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
   "go.mongodb.org/mongo-driver/mongo"
-  "go.mongodb.org/mongo-driver/mongo/options"
+  //"go.mongodb.org/mongo-driver/mongo/options"
 
   "github.com/ckbball/quik"
 )
@@ -23,11 +23,11 @@ func NewUserService(client *mongo.Collection) *UserService {
   }
 }
 
-func (s *UserService) GetById(id string) (*User, error) {
+func (s *UserService) GetByID(id string) (*quik.User, error) {
   primitiveId, _ := primitive.ObjectIDFromHex(id)
 
-  var user User
-  err := s.ds.FindOne(context.TODO(), User{Id: primitiveId}).Decode(&user)
+  var user quik.User
+  err := s.ds.FindOne(context.TODO(), quik.User{Id: primitiveId}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -35,10 +35,10 @@ func (s *UserService) GetById(id string) (*User, error) {
   return &user, nil
 }
 
-func (s *UserService) GetByJobStatus(status int) (*User, error) {
+func (s *UserService) GetByJobStatus(status int) (*quik.User, error) {
 
-  var user User
-  err := s.ds.FindOne(context.TODO(), User{JobSearch: status}).Decode(&user)
+  var user quik.User
+  err := s.ds.FindOne(context.TODO(), quik.User{JobSearch: status}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -46,10 +46,10 @@ func (s *UserService) GetByJobStatus(status int) (*User, error) {
   return &user, nil
 }
 
-func (s *UserService) GetByEmail(email string) (*User, error) {
+func (s *UserService) GetByEmail(email string) (*quik.User, error) {
 
-  var user User
-  err := s.ds.FindOne(context.TODO(), User{Email: email}).Decode(&user)
+  var user quik.User
+  err := s.ds.FindOne(context.TODO(), quik.User{Email: email}).Decode(&user)
   if err != nil {
     return nil, err
   }
@@ -57,7 +57,7 @@ func (s *UserService) GetByEmail(email string) (*User, error) {
   return &user, nil
 }
 
-func (service *UserService) CreateUser(user *v1.User) (string, error) {
+func (service *UserService) CreateUser(user *quik.User) error {
   // add a duplicate email and a duplicate username check
 
   insertUser := bson.D{
@@ -70,19 +70,19 @@ func (service *UserService) CreateUser(user *v1.User) (string, error) {
   result, err := service.ds.InsertOne(context.TODO(), insertUser)
 
   if err != nil {
-    return "", err
+    return err
   }
+  /*
+     id := result.InsertedID
+     w, _ := id.(primitive.ObjectID)
 
-  id := result.InsertedID
-  w, _ := id.(primitive.ObjectID)
-
-  out := w.Hex()
-
-  return out, err
+     out := w.Hex()
+  */
+  return err
 
 }
 
-func (service *UserService) UpsertUser(user *v1.User, id string) (int64, int64, error) {
+func (service *UserService) UpsertUser(user *quik.User, id string) (int64, int64, error) {
   // add a duplicate email and a duplicate username check
 
   primitiveId, _ := primitive.ObjectIDFromHex(id)

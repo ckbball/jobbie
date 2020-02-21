@@ -1,7 +1,7 @@
 package http
 
 import (
-  "github.com/labstack/echo/v4"
+  //"github.com/labstack/echo/v4"
 
   "github.com/ckbball/quik"
   "github.com/ckbball/quik/utils"
@@ -10,7 +10,7 @@ import (
 type userResponse struct {
   User struct {
     Email     string       `json:"email,omitempty"`
-    Token  string       `json:"token,omitempty"`
+    Token     string       `json:"token,omitempty"`
     FirstName string       `json:"first_name,omitempty"`
     LastName  string       `json:"last_name,omitempty"`
     JobSearch int          `json:"job_search,omitempty"`
@@ -18,15 +18,13 @@ type userResponse struct {
   } `json:"user"`
 }
 
-func newUserResponse(u *model.User) *userResponse {
-  return &userResponse{
-    &User{
-      Email: u.Email,
-      FirstName: u.FirstName,
-      LastName: u.LastName,
-      JobSearch: u.JobSearch,
-      Profile: u.Profile,
-      Token: utils.Encode(u)
-    }
-  }
+func newUserResponse(u *quik.User) *userResponse {
+  var r userResponse
+  r.User.Email = u.Email
+  r.User.FirstName = u.FirstName
+  r.User.LastName = u.LastName
+  r.User.JobSearch = u.JobSearch
+  r.User.Profile = u.Profile
+  r.User.Token = utils.Encode(u)
+  return r
 }

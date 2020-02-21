@@ -1,7 +1,7 @@
 package quik
 
 import (
-  "context"
+  //"context"
   "errors"
 
   "go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,11 +14,11 @@ type Company struct {
   Password     string             `json:"password,omitempty" bson:"password,omitempty"`
   CompanyName  string             `json:"company_name,omitempty" bson:"company_name,omitempty"`
   Size         int                `json:"size,omitempty" bson:"size,omitempty"` // 0 - not looking, 1 - open to opportunities, 2 - active
-  Profile      Profile            `json:"profile,omitempty" bson:"profile,omitempty"`
+  Profile      CompanyProfile     `json:"profile,omitempty" bson:"profile,omitempty"`
   Applications []string           `json:"applications,omitempty" bson:"applications,omitempty"` // holds the id's of applications
 }
 
-type Profile struct {
+type CompanyProfile struct {
   Technologies []string // string list of technology used at company
   Openings     int
 }

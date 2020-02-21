@@ -30,7 +30,7 @@ func (r *userUpsertRequest) populate(u *quik.User) {
   r.User.Profile = u.Profile
 }
 
-func (r *userUpsertRequest) bind(c echo.Context, u *quik.User) {
+func (r *userUpsertRequest) bind(c echo.Context, u *quik.User) error {
   if err := c.Bind(r); err != nil {
     return err
   }
