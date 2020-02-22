@@ -23,6 +23,7 @@ type userHandler struct {
 func newUserHandler() *userHandler {
   h := &userHandler{router: chi.NewRouter()}
   h.router.Post("/signup", h.handleNewUser)
+  h.router.Post("/login", h.handleLogin)
   return h
 }
 
@@ -85,4 +86,31 @@ func (h *userHandler) handleNewUser(w http.ResponseWriter, r *http.Request) {
   w.Header().Set("Content-Type", "application/json")
   w.WriteHeader(http.StatusCreated)
   w.Write(marshalledResp)
+}
+
+func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
+  // initialize variables
+  user := &quik.User{}
+  req := &userLoginRequest{}
+
+  // bind request to request struct
+  reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
+    return
+  }
+
+  // unmarshal json body into team request struct
+  err = json.Unmarshal(reqBody, &req)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
+  }
+
+  // find user by email
+
+  // compare user's password from db with password from request, if match generate new token and return it
+
 }
