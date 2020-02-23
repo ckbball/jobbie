@@ -111,30 +111,36 @@ func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
     return
   }
 
+  fmt.Fprintf(os.Stderr, "user after bind: %s\n", req.Email)
+
   // find user by email
-  user, err = h.userService.GetByEmail(req.User.Email)
+  user, err = h.userService.GetByEmail(req.Email)
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
     //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
     return
   }
 
+  fmt.Fprintf(os.Stderr, "user after db: %s\n", user)
+
   // compare user's password from db with password from request, if match generate new token and return it
   // Compare given password to stored hash
-  if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.User.Password)); err != nil {
-    return nil, err
+  if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    fmt.Fprintf(os.Stderr, "err caught in compare and hash: \n")
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
   }
 
-  intID := user.Id.Hex()
-
   userModel := &quik.User{
-    Id:    intID,
+    Id:    user.Id,
     Email: user.Email,
   }
 
   token, err := utils.Encode(userModel)
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
+    fmt.Fprintf(os.Stderr, "error caught in token encode: \n")
     //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
     return
   }
@@ -143,6 +149,7 @@ func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
   marshalledResp, err := json.Marshal(newLoginResponse(user.Email, token))
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
+    fmt.Fprintf(os.Stderr, "error caught in response marshall: \n")
     //log.WithField("error", err).Error("marshall error")
     //log.Infof("Error in marshalling successful response. line 52. createTeamHandler(). \nerr: %v", err.Error())
     return
@@ -150,7 +157,7 @@ func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
 
   // write headers and the response
   w.Header().Set("Content-Type", "application/json")
-  w.WriteHeader(http.StatusOk)
+  w.WriteHeader(http.StatusOK)
   w.Write(marshalledResp)
 
 }

@@ -2,6 +2,8 @@ package mongo
 
 import (
   "context"
+  "fmt"
+  "os"
 
   "go.mongodb.org/mongo-driver/bson"
   "go.mongodb.org/mongo-driver/bson/primitive"
@@ -48,8 +50,10 @@ func (s *UserService) GetByJobStatus(status int) (*quik.User, error) {
 
 func (s *UserService) GetByEmail(email string) (*quik.User, error) {
 
+  fmt.Fprintf(os.Stderr, "email after db: %s\n", email)
+
   var user quik.User
-  err := s.db.ds.FindOne(context.TODO(), quik.User{Email: email}).Decode(&user)
+  err := s.db.ds.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
   if err != nil {
     return nil, err
   }

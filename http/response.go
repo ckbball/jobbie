@@ -31,7 +31,11 @@ func newUserResponse(u *quik.User) *userResponse {
   r.User.LastName = u.LastName
   r.User.JobSearch = u.JobSearch
   r.User.Profile = u.Profile
-  r.User.Token = u.Password
+  token, err := utils.Encode(u)
+  if err != nil {
+    return &r
+  }
+  r.User.Token = token
   return &r
 }
 

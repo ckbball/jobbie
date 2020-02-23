@@ -108,10 +108,8 @@ func (r *userRegisterRequest) bind(c echo.Context, u *quik.User) error {
 }
 
 type userLoginRequest struct {
-  User struct {
-    Email    string `json:"email" validate:"required,email"`
-    Password string `json:"password" validate:"required"`
-  } `json:"user"`
+  Email    string `json:"email" validate:"required,email"`
+  Password string `json:"password" validate:"required"`
 }
 
 func (r *userLoginRequest) bind(c echo.Context) error {

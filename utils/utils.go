@@ -8,7 +8,9 @@ import (
   "github.com/ckbball/quik"
 )
 
-const key = "hehehoohoo9wf"
+var (
+  key = []byte("hehehoohoo9wf")
+)
 
 // CustomClaims is our custom metadata, which will be hashed
 // and sent as the second segment in our JWT
