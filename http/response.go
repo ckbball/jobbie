@@ -18,6 +18,12 @@ type userResponse struct {
   } `json:"user"`
 }
 
+type loginResponse struct {
+  Email string `json:"email"`
+  Token string `json:"token"`
+}
+
+//
 func newUserResponse(u *quik.User) *userResponse {
   var r userResponse
   r.User.Email = u.Email
@@ -25,10 +31,13 @@ func newUserResponse(u *quik.User) *userResponse {
   r.User.LastName = u.LastName
   r.User.JobSearch = u.JobSearch
   r.User.Profile = u.Profile
-  token, err := utils.Encode(u)
-  if err != nil {
-    return &r
-  }
-  r.User.Token = token
+  r.User.Token = u.Password
   return &r
+}
+
+func newLoginResponse(email, token string) *loginResponse {
+  return &loginResponse{
+    Email: email,
+    Token: token,
+  }
 }

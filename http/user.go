@@ -8,9 +8,11 @@ import (
   "net/http"
   "os"
 
-  "github.com/ckbball/quik"
   "github.com/go-chi/chi"
   "golang.org/x/crypto/bcrypt"
+
+  "github.com/ckbball/quik"
+  "github.com/ckbball/quik/utils"
 )
 
 type userHandler struct {
@@ -110,7 +112,45 @@ func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
   }
 
   // find user by email
+  user, err = h.userService.GetByEmail(req.User.Email)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
+  }
 
   // compare user's password from db with password from request, if match generate new token and return it
+  // Compare given password to stored hash
+  if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.User.Password)); err != nil {
+    return nil, err
+  }
+
+  intID := user.Id.Hex()
+
+  userModel := &quik.User{
+    Id:    intID,
+    Email: user.Email,
+  }
+
+  token, err := utils.Encode(userModel)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
+  }
+
+  // marshall a successful response
+  marshalledResp, err := json.Marshal(newLoginResponse(user.Email, token))
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.WithField("error", err).Error("marshall error")
+    //log.Infof("Error in marshalling successful response. line 52. createTeamHandler(). \nerr: %v", err.Error())
+    return
+  }
+
+  // write headers and the response
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOk)
+  w.Write(marshalledResp)
 
 }

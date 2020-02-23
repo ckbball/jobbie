@@ -23,6 +23,19 @@ type User struct {
   Secret       string             // this is the string they will post to their github profile to confirm that the account is theirs?
 }
 
+// need context when using SQL DB
+type UserService interface {
+  CreateUser(user *User) error
+  UpsertUser(user *User, id string) (int64, int64, error)
+  GetByID(id string) (*User, error)
+  GetByEmail(email string) (*User, error)
+  GetByJobStatus(status int) (*User, error)
+  // AddApplication
+  // AddListing
+  // RemoveApplication
+  // RemoveListing
+}
+
 func (u *User) FieldMap(req *http.Request) binding.FieldMap {
   return binding.FieldMap{
     &u.Id:           "_id",
@@ -35,19 +48,6 @@ func (u *User) FieldMap(req *http.Request) binding.FieldMap {
     &u.Applications: "applications",
     &u.SavedJobs:    "saved_jobs",
   }
-}
-
-// need context when using SQL DB
-type UserService interface {
-  CreateUser(user *User) error
-  UpsertUser(user *User, id string) (int64, int64, error)
-  GetByID(id string) (*User, error)
-  GetByEmail(email string) (*User, error)
-  GetByJobStatus(status int) (*User, error)
-  // AddApplication
-  // AddListing
-  // RemoveApplication
-  // RemoveListing
 }
 
 type Profile struct {
