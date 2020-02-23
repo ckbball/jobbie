@@ -12,6 +12,10 @@ var (
   key = []byte("hehehoohoo9wf")
 )
 
+func GetKey() []byte {
+  return key
+}
+
 // CustomClaims is our custom metadata, which will be hashed
 // and sent as the second segment in our JWT
 type CustomClaims struct {

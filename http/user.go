@@ -161,3 +161,65 @@ func (h *userHandler) handleLogin(w http.ResponseWriter, r *http.Request) {
   w.Write(marshalledResp)
 
 }
+
+// needs to be authenticated
+func (h *userHandler) handleUpsertUser(w http.ResponseWriter, r *http.Request) {
+  // initialize variables
+  user := &quik.User{}
+  req := &userUpsertRequest{}
+
+  // extract id from request context, placed by auth middleware
+
+  // bind request to request struct
+  reqBody, err := ioutil.ReadAll(r.Body)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
+    return
+  }
+
+  // unmarshal json body into team request struct
+  err = json.Unmarshal(reqBody, &req)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in unmarshalling body. line 35. createTeamHandler(). \nbody: %v", reqBody)
+    return
+  }
+
+  hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.User.Password), bcrypt.DefaultCost)
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
+    return
+  }
+  user.Email = req.User.Email
+  user.Password = string(hashedPass)
+  user.FirstName = req.User.FirstName
+  user.LastName = req.User.LastName
+  user.JobSearch = req.User.JobSearch
+  user.Profile = req.User.Profile
+
+  fmt.Fprintf(os.Stderr, "user after bind: %s\n", req.User)
+
+  // call the datastore method to create a new user in the datastore
+
+  if err := h.userService.CreateUser(user); err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.Infof("Error in reading request body. line 27. createTeamHandler(). \nbody: %v", r.Body)
+    return
+  }
+
+  // marshall a successful response
+  marshalledResp, err := json.Marshal(newUserResponse(user))
+  if err != nil {
+    http.Error(w, err.Error(), http.StatusInternalServerError)
+    //log.WithField("error", err).Error("marshall error")
+    //log.Infof("Error in marshalling successful response. line 52. createTeamHandler(). \nerr: %v", err.Error())
+    return
+  }
+
+  // write headers and the response
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusCreated)
+  w.Write(marshalledResp)
+}

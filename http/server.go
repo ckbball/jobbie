@@ -68,6 +68,7 @@ func (s *Server) Router() http.Handler {
   r := chi.NewRouter()
 
   // Attach router middleware.
+  r.Use(utils.AllowCORS)
   r.Use(middleware.RealIP)
   r.Use(middleware.Logger)
   if s.Recoverable {
@@ -80,7 +81,7 @@ func (s *Server) Router() http.Handler {
 
   // Create API routes.
   r.Route("/api/v1/", func(r chi.Router) {
-    //r.Use(middleware.DefaultCompress)
+    r.Use(utils.UserAuth)
     //r.Get("/ping", s.handlePing)
     r.Mount("/users", s.userHandler())
   })

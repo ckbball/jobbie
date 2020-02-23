@@ -22,19 +22,6 @@ type userUpsertRequest struct {
   } `json:"user"`
 }
 
-func (u *userUpsertRequest) FieldMap(req *http.Request) binding.FieldMap {
-  return binding.FieldMap{
-    &u.User.Email:        "email",
-    &u.User.Password:     "password",
-    &u.User.FirstName:    "first_name",
-    &u.User.LastName:     "last_name",
-    &u.User.JobSearch:    "job_search",
-    &u.User.Profile:      "profile",
-    &u.User.Applications: "applications",
-    &u.User.SavedJobs:    "saved_jobs",
-  }
-}
-
 func newUserUpsertRequest() *userUpsertRequest {
   return &userUpsertRequest{}
 }
@@ -46,29 +33,6 @@ func (r *userUpsertRequest) populate(u *quik.User) {
   r.User.LastName = u.LastName
   r.User.JobSearch = u.JobSearch
   r.User.Profile = u.Profile
-}
-
-func (r *userUpsertRequest) bind(c echo.Context, u *quik.User) error {
-  if err := c.Bind(r); err != nil {
-    return err
-  }
-  if err := c.Validate(r); err != nil {
-    return err
-  }
-  u.Email = r.User.Email
-  u.FirstName = r.User.FirstName
-  u.LastName = r.User.LastName
-  u.JobSearch = r.User.JobSearch
-  u.Profile = r.User.Profile
-  if r.User.Password != u.Password {
-    h, err := u.HashPassword(r.User.Password)
-    if err != nil {
-      return err
-    }
-
-    u.Password = h
-  }
-  return nil
 }
 
 type userRegisterRequest struct {
@@ -87,24 +51,6 @@ func (u *userRegisterRequest) FieldMap(req *http.Request) binding.FieldMap {
     &u.User.FirstName: "first_name",
     &u.User.LastName:  "last_name",
   }
-}
-
-func (r *userRegisterRequest) bind(c echo.Context, u *quik.User) error {
-  if err := c.Bind(r); err != nil {
-    return err
-  }
-  if err := c.Validate(r); err != nil {
-    return err
-  }
-  u.FirstName = r.User.FirstName
-  u.LastName = r.User.LastName
-  u.Email = r.User.Email
-  h, err := u.HashPassword(r.User.Password)
-  if err != nil {
-    return err
-  }
-  u.Password = h
-  return nil
 }
 
 type userLoginRequest struct {
